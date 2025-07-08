@@ -1,5 +1,5 @@
 <div class="wishlist-inspire__icon" x-data="wishlist">
-{% if customer.tags contains 'EMPLOYEE' %}
+{% if customer %}
   <button type="button" @click.debounce="addToWishlist()">
     <svg class="wishlist-inspire__icon--svg" viewBox="0 0 24 24" stroke-width="1" stroke="#000" :fill="wishlisted ? '{{ block.settings.colour }}' : '#fff' ">
       <path d="M12 21.35l-1.45-1.32C5.4 15.73 2 12.27 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.77-3.4 7.23-8.55 11.53L12 21.35z"/>
@@ -8,7 +8,10 @@
       <span class="wishlist-inspire__icon--text">{{ block.settings.text }}</span>
     {% endif %}
   </button>
+{% else %}
+  <p>Please <a href="/account/login">log in</a> to add items to your wishlist.</p>
 {% endif %}
+
 </div>
 
 {% comment %} <div style="justify-content: left; display: flex; margin-top: 3rem;">
@@ -39,7 +42,7 @@
               .catch(error => console.error('Error fetching wishlist status:', error));
             },
             wishlisted: false,
-            appUrl: "https://mysql-adjustment-pack-racks.trycloudflare.com",
+            appUrl: "https://wishlist-remix-app.onrender.com",
             addToWishlist(){
 
               {% unless customer %}
