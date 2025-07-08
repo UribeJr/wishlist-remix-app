@@ -80,7 +80,7 @@
   document.addEventListener('DOMContentLoaded', function() {
     const shopDomain = "{{ shop.permanent_domain }}";
     const customerId = {{ customer.id | default: 'null' }};
-    const appUrl = "https://health-melbourne-urge-sequences.trycloudflare.com";
+    const appUrl = "https://mysql-adjustment-pack-racks.trycloudflare.com";
 
     if (customerId) {
       fetch(`${appUrl}/api/wishlist?customerId={{ customer.id }}&shop={{ shop.permanent_domain }}`)
@@ -211,7 +211,7 @@
     formdata.append("needs", needs);
     formdata.append("variantId", currentVariantId);
 
-    fetch("https://health-melbourne-urge-sequences.trycloudflare.com/api/wishlist", {
+    fetch("https://mysql-adjustment-pack-racks.trycloudflare.com/api/wishlist", {
       method: "PUT",
       body: formdata,
       redirect: "follow"
