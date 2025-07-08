@@ -1,0 +1,239 @@
+<div class="wishlist-list-block">
+  {% if customer %}
+  <h2>Your Wishlist</h2>
+  {% else %}
+    <p>Please <a href="/account/login">log in</a> to view your wishlist.</p>
+  {% endif %}
+  <div id="wishlist-list-container"></div>
+</div>
+
+<!-- Notes Modal -->
+<div id="notes-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:9999; align-items:center; justify-content:center;">
+  <div style="background:#fff; padding:24px; border-radius:10px; max-width:400px; width:90%; box-shadow:0 2px 20px rgba(0,0,0,0.2); position:relative;">
+    <h3 id="modal-product-title" style="margin-top:0;">Add Notes</h3>
+
+    <!-- Notes textarea -->
+    <textarea id="modal-notes-input" rows="4" placeholder="Enter notes" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;"></textarea>
+
+        <!-- Has / Needs inputs -->
+    <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+      <div style="flex: 1;">
+        <label for="has-input" style="display:block; font-weight:600; margin-bottom:4px;">Has</label>
+        <input type="number" id="has-input" min="0" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px;" />
+      </div>
+      <div style="flex: 1;">
+        <label for="needs-input" style="display:block; font-weight:600; margin-bottom:4px;">Needs</label>
+        <input type="number" id="needs-input" min="0" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px;" />
+      </div>
+    </div>
+
+
+    <!-- Action buttons -->
+    <div style="margin-top:12px; display:flex; justify-content:flex-end; gap:8px;">
+      <button onclick="closeNotesModal()" style="padding:6px 12px; background:#888; color:#fff; border:none; border-radius:4px; font-size: .8em; font-weight: 600;">Cancel</button>
+      <button onclick="submitNotes()" style="padding:6px 12px; background:#cf202f; color:#fff; border:none; border-radius:4px; font-size: .8em; font-weight: 600;" >Save</button>
+    </div>
+  </div>
+</div>
+
+
+<style>
+#wishlist-list-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-top: 24px;
+}
+@media (max-width: 1000px) {
+  #wishlist-list-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  #wishlist-list-container {
+    grid-template-columns: 1fr;
+  }
+}
+.wishlist-product-card {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  transition: box-shadow 0.2s;
+}
+.wishlist-product-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+}
+.wishlist-card-image {
+  margin-bottom: 12px;
+}
+</style>
+
+<script>
+  let currentVariantId = null;
+  let currentProductTitle = '';
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const shopDomain = "{{ shop.permanent_domain }}";
+    const customerId = {{ customer.id | default: 'null' }};
+    const appUrl = "https://health-melbourne-urge-sequences.trycloudflare.com";
+
+    if (customerId) {
+      fetch(`${appUrl}/api/wishlist?customerId={{ customer.id }}&shop={{ shop.permanent_domain }}`)
+        .then(response => response.json())
+        .then(result => {
+          if (result.data && result.data.length > 0) {
+            result.data.forEach(item => {
+              fetch(`https://${shopDomain}/api/2025-07/graphql.json`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Accept": "application/json"
+                },
+                body: JSON.stringify({
+                  query: `
+                    query ProductVariantById($id: ID!) {
+                      node(id: $id) {
+                        ... on ProductVariant {
+                          id
+                          title
+                          availableForSale
+                          price {
+                            amount
+                            currencyCode
+                          }
+                          product {
+                            title
+                            handle
+                            featuredImage {
+                              url
+                              altText
+                            }
+                          }
+                        }
+                      }
+                    }`,
+                  variables: {
+                    id: `gid://shopify/ProductVariant/${item.variantId}`
+                  }
+                })
+              })
+              .then(res => res.json())
+              .then(result => {
+                const productVariant = result.data.node;
+                const productVarriantDisplayTitle = productVariant.title.includes('Default') ? '' : productVariant.title;
+                const productTitle = productVariant.product.title;
+                const productPrice = productVariant.price.amount;
+                const productHandle = productVariant.product.handle;
+                const productImage = productVariant.product.featuredImage ? productVariant.product.featuredImage.url : '';
+                const wishlistListContainer = document.getElementById('wishlist-list-container');
+
+                const productElement = document.createElement('div');
+                productElement.className = 'wishlist-product-card';
+                productElement.innerHTML = `
+                  <div class="wishlist-card-image" style="position: relative; width: 100%; aspect-ratio: 1 / 1; overflow: hidden; border-radius: 8px;">
+                  <a href="/products/${productHandle}/?variant=${item.variantId}">
+                    <img src="${productImage}" style="width: 100%; height: 100%; object-fit: contain; position: absolute; top: 0; left: 0;">
+                  </a>
+                  </div>
+                  <div class="wishlist-card-body">
+                    <a href="/products/${productHandle}/?variant=${item.variantId}" style="font-size: 0.9em; margin: 0 0 8px 0; display: block; text-decoration: none; color: inherit; font-weight: 800;">${productTitle}</a>
+                    <p style="margin: 0 0 4px 0; color: #888; font-size:.9em;">${productVarriantDisplayTitle}</p>
+                    <p style="margin: 0 0 8px 0; font-weight: bold;">$${productPrice}</p>
+                    <span style="color:#888;font-size: .8em; display: block;">Notes: ${item.notes}</span>
+                    <span style="color:#888;font-size: .8em; display: block;">Has: ${item.has}</span>
+                    <span style="color:#888;font-size: .8em; display: block;">Needs: ${item.needs}</span>
+                    <button
+                      onclick="openNotesModal('${item.variantId}', '${productTitle.replace(/'/g, "\\'")}')"
+                      style="
+                        background: none;
+                        border: none;  
+                        padding: 0;
+                        margin-top: 8px;
+                        color:rgb(167, 167, 167);
+                        text-decoration: underline;
+                        cursor: pointer;
+                        font: inherit;
+                        font-size: .8em;
+                      "
+                    >
+                      Add/Edit Notes
+                    </button>
+
+                    <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+                    <a href="/cart/add?id=${item.variantId}" style="display: inline-block; padding: 6px 12px; background: #000; color: #fff; border-radius: 4px; text-decoration: none; font-size:.8em;">Add to Cart</a>
+                    
+                  </div>
+                `;
+                wishlistListContainer.appendChild(productElement);
+              })
+              .catch(error => console.error('Error fetching product details:', error));
+            });
+          } else {
+            console.log('No wishlist items found.');
+          }
+        })
+        .catch(error => console.error('Error fetching wishlist items:', error));
+    }
+  });
+
+  function openNotesModal(variantId, productTitle) {
+    currentVariantId = variantId;
+    currentProductTitle = productTitle;
+    document.getElementById('modal-product-title').textContent = `Notes`;
+    document.getElementById('modal-notes-input').value = '';
+    document.getElementById('has-input').value = '';
+    document.getElementById('needs-input').value = '';
+    document.getElementById('notes-modal').style.display = 'flex';
+  }
+
+  function closeNotesModal() {
+    document.getElementById('notes-modal').style.display = 'none';
+  }
+
+  function submitNotes() {
+    const notes = document.getElementById('modal-notes-input').value;
+    const has = (document.getElementById('has-input').value) || 0;
+    const needs = (document.getElementById('needs-input').value) || 0;
+
+    console.log("Submitting notes:", { notes, has, needs, variantId: currentVariantId });
+    if (!notes) return alert("Please enter some notes.");
+
+    const formdata = new FormData();
+    formdata.append("customerId", "{{ customer.id }}");
+    formdata.append("shop", "{{ shop.permanent_domain }}");
+    formdata.append("notes", notes);
+    formdata.append("has", has);
+    formdata.append("needs", needs);
+    formdata.append("variantId", currentVariantId);
+
+    fetch("https://health-melbourne-urge-sequences.trycloudflare.com/api/wishlist", {
+      method: "PUT",
+      body: formdata,
+      redirect: "follow"
+    })
+    .then((response) => response.text())
+    .then((result) => {
+      console.log("Note saved:", result);
+      alert("Note saved!");
+      closeNotesModal();
+      window.location.reload();
+    })
+    .catch((error) => {
+      console.error("Error saving note:", error);
+      alert("Error saving note.");
+    });
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Wishlist List",
+  "target": "section",
+  "settings": []
+}
+{% endschema %}
