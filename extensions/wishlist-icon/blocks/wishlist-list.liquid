@@ -146,9 +146,7 @@
                   <div class="wishlist-card-body">
                     <a href="/products/${productHandle}/?variant=${item.variantId}" style="font-size: 0.9em; margin: 0 0 8px 0; display: block; text-decoration: none; color: inherit; font-weight: 800;">${productTitle}</a>
                     <p style="margin: 0 0 4px 0; color: #888; font-size:.9em;">${productVarriantDisplayTitle}</p>
-                    {% if product.tags contains 'SALE' %}
                     <p style="margin: 0 0 8px 0; font-weight: bold;">$${productPrice}</p>
-                    {% endif %}
                     <span style="color:#888;font-size: .8em; display: block;">Notes: ${item.notes}</span>
                     <span style="color:#888;font-size: .8em; display: block;">Has: ${itemHas}</span>
                     <span style="color:#888;font-size: .8em; display: block;">Needs: ${itemNeeds}</span>
