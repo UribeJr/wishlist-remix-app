@@ -11,6 +11,7 @@
 <div id="notes-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:9999; align-items:center; justify-content:center;">
   <div style="background:#fff; padding:24px; border-radius:10px; max-width:400px; width:90%; box-shadow:0 2px 20px rgba(0,0,0,0.2); position:relative;">
     <h3 id="modal-product-title" style="margin-top:0;">Add Notes</h3>
+    
 
     <!-- Notes textarea -->
     <textarea id="modal-notes-input" rows="4" placeholder="Enter notes" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;"></textarea>
@@ -19,11 +20,11 @@
     <div style="display: flex; gap: 12px; margin-bottom: 12px;">
       <div style="flex: 1;">
         <label for="has-input" style="display:block; font-weight:600; margin-bottom:4px;">Has</label>
-        <input type="number" id="has-input" min="0" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px;" />
+        <input type="number" placeholder="0" id="has-input" min="0" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px;" />
       </div>
       <div style="flex: 1;">
         <label for="needs-input" style="display:block; font-weight:600; margin-bottom:4px;">Needs</label>
-        <input type="number" id="needs-input" min="0" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px;" />
+        <input type="number" placeholder="0" id="needs-input" min="0" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px;" />
       </div>
     </div>
 
@@ -80,7 +81,7 @@
   document.addEventListener('DOMContentLoaded', function() {
     const shopDomain = "{{ shop.permanent_domain }}";
     const customerId = {{ customer.id | default: 'null' }};
-    const appUrl = "https://wishlist-remix-app.onrender.com";
+    const appUrl = "https://publicly-putting-connecting-floppy.trycloudflare.com";
 
     if (customerId) {
       fetch(`${appUrl}/api/wishlist?customerId={{ customer.id }}&shop={{ shop.permanent_domain }}`)
@@ -131,6 +132,8 @@
                 const productHandle = productVariant.product.handle;
                 const productImage = productVariant.product.featuredImage ? productVariant.product.featuredImage.url : '';
                 const wishlistListContainer = document.getElementById('wishlist-list-container');
+                const itemHas = item.has || 0;
+                const itemNeeds = item.needs || 0;
 
                 const productElement = document.createElement('div');
                 productElement.className = 'wishlist-product-card';
@@ -143,10 +146,12 @@
                   <div class="wishlist-card-body">
                     <a href="/products/${productHandle}/?variant=${item.variantId}" style="font-size: 0.9em; margin: 0 0 8px 0; display: block; text-decoration: none; color: inherit; font-weight: 800;">${productTitle}</a>
                     <p style="margin: 0 0 4px 0; color: #888; font-size:.9em;">${productVarriantDisplayTitle}</p>
+                    {% if product.tags contains 'SALE' %}
                     <p style="margin: 0 0 8px 0; font-weight: bold;">$${productPrice}</p>
+                    {% endif %}
                     <span style="color:#888;font-size: .8em; display: block;">Notes: ${item.notes}</span>
-                    <span style="color:#888;font-size: .8em; display: block;">Has: ${item.has}</span>
-                    <span style="color:#888;font-size: .8em; display: block;">Needs: ${item.needs}</span>
+                    <span style="color:#888;font-size: .8em; display: block;">Has: ${itemHas}</span>
+                    <span style="color:#888;font-size: .8em; display: block;">Needs: ${itemNeeds}</span>
                     <button
                       onclick="openNotesModal('${item.variantId}', '${productTitle.replace(/'/g, "\\'")}')"
                       style="
@@ -211,7 +216,7 @@
     formdata.append("needs", needs);
     formdata.append("variantId", currentVariantId);
 
-    fetch("https://wishlist-remix-app.onrender.com/api/wishlist", {
+    fetch("https://publicly-putting-connecting-floppy.trycloudflare.com/api/wishlist", {
       method: "PUT",
       body: formdata,
       redirect: "follow"
