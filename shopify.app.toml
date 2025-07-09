@@ -3,7 +3,7 @@
 client_id = "12ad595b7060f8c4f69a26b37d661faf"
 name = "save-for-later-wishlist"
 handle = "save-for-later-wishlist"
-application_url = "https://publicly-putting-connecting-floppy.trycloudflare.com"
+application_url = "https://wishlist-remix-app.onrender.com"
 embedded = true
 
 [build]
@@ -27,9 +27,9 @@ scopes = "write_products, unauthenticated_read_product_listings, read_products"
 
 [auth]
 redirect_urls = [
-  "https://publicly-putting-connecting-floppy.trycloudflare.com/auth/callback",
-  "https://publicly-putting-connecting-floppy.trycloudflare.com/auth/shopify/callback",
-  "https://publicly-putting-connecting-floppy.trycloudflare.com/api/auth/callback"
+  "https://wishlist-remix-app.onrender.com/auth/callback",
+  "https://wishlist-remix-app.onrender.com/auth/shopify/callback",
+  "https://wishlist-remix-app.onrender.com/api/auth/callback"
 ]
 
 [pos]
