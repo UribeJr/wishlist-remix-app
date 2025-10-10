@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "12ad595b7060f8c4f69a26b37d661faf"
-name = "save-for-later-wishlist"
+name = "WishlistFu"
 handle = "save-for-later-wishlist"
 application_url = "https://wishlist-remix-app.onrender.com"
 embedded = true
